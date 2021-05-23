@@ -1,5 +1,6 @@
 const db = require('./db/connection');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
 
 const init = () => {
   inquirer.prompt([
@@ -41,21 +42,50 @@ const init = () => {
             .then(answer => {
               const newDepartment = answer.departmentNameInput;
 
-                const sql = `INSERT INTO departments (name)
-                             VALUES (?)`;
+              const sql = `INSERT INTO departments (name)
+                           VALUES (?)`;
               db.query(sql, newDepartment, (err, result) => {
                 if (err) throw err
                 console.log(`${newDepartment} added`);
                 init();
-              })
+              });
             });
         
           break;
         //==========================================//
         
+        //========== Case: Add Role ================//
         case 'Add a role':
-          console.log('case: add role');
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'roleTitleInput',
+              message: 'What is the title of the role you are adding?'
+            },
+            {
+              type: 'input',
+              name: 'salaryInput',
+              message: 'What is the salary of this role?'
+            },
+            {
+              type: 'input',
+              name: 'departmentIdInput',
+              message: 'What is the id of the department this role belongs to?'
+            }
+          ])
+            .then(answers => {
+              const params = [answers.roleTitleInput, answers.salaryInput, answers.departmentIdInput];
+              const sql = `INSERT INTO role (title, salary, department_id)
+                           VALUES (?, ?, ?)`;
+              db.query(sql, params, (err, result) => {
+                if (err) throw err
+                console.log(`${answers.roleTitleInput} added`);
+                init();
+              });
+            });
+
           break;
+        //==============================================//
         case 'Add an employee':
         console.log('case: add employee');
         break;

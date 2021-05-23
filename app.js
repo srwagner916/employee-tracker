@@ -22,7 +22,7 @@ const init = () => {
   ])
     .then(answer => {
       switch (answer.initPrompt) {
-      ///=========== Case: View departments ===========//
+      ///=========== Case: View departments
         case 'View all departments':
           let viewDepartmentssql = `SELECT * FROM departments`
           db.query(viewDepartmentssql, (err, result) => {
@@ -31,9 +31,9 @@ const init = () => {
             init();
           });
           break;
-      //================================================//
+      // end case
 
-      //=========== Case: view roles ===================//
+      //=========== Case: view roles
         case 'View all roles':
 
           let viewRolessql= `SELECT role.id, role.title, role.salary, departments.name AS department
@@ -47,12 +47,25 @@ const init = () => {
           });
 
           break;
-      //==============================================//
-
+      //end case
+      
+      //========== Case: View all employees
         case 'View all employees':
-          console.log('case: view employees');
+          const viewAllEmployeessql = `SELECT employee.id, employee.first_name, employee.last_name, role.title AS title, departments.name AS department, role.salary AS salary, CONCAT(manager.first_name, ' ', manager.last_name, ' ') AS manager
+                                       FROM employee
+                                       JOIN role ON role.id = employee.role_id
+                                       JOIN departments ON departments.id = role.department_id
+                                       LEFT JOIN employee manager ON employee.manager_id = manager.id`
+          
+          db.query(viewAllEmployeessql, (err, result) => {
+            if (err) throw err;
+            console.table(result);
+            init();
+          });
+
           break;
-        //========= Case: Add Department ===========//
+
+        //========= Case: Add Department
         case 'Add a department':
           inquirer.prompt([
             {
@@ -74,9 +87,9 @@ const init = () => {
             });
         
           break;
-        //==========================================//
+        // end case
         
-        //========== Case: Add Role ================//
+        //========== Case: Add Role
         case 'Add a role':
           inquirer.prompt([
             {
@@ -107,7 +120,7 @@ const init = () => {
             });
 
           break;
-        //==============================================//
+        // end case
         case 'Add an employee':
         console.log('case: add employee');
         break;

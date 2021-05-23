@@ -15,15 +15,23 @@ const init = () => {
           'Add a department',
           'Add a role',
           'Add an employee',
-          "Update an employee's role"
+          "Update an employee's role",
+          'Finish'
         ]
     }
   ])
     .then(answer => {
       switch (answer.initPrompt) {
+      ///=========== Case: View departments ===========//
         case 'View all departments':
-          console.log('case: view departments');
+          const sql = `SELECT * FROM departments`
+          db.query(sql, (err, result) => {
+            if (err) throw err;
+            console.table(result);
+            init();
+          });
           break;
+      //================================================//
         case 'View all roles':
           console.log('case: view roles');
           break;
@@ -91,6 +99,8 @@ const init = () => {
         break;
       case "Update an employee's role":
         console.log('case: update employee role');
+        break;
+      case 'Finish':
         break;
     }
   });

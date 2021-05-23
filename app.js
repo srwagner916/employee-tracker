@@ -125,7 +125,37 @@ const init = () => {
         console.log('case: add employee');
         break;
       case "Update an employee's role":
-        console.log('case: update employee role');
+        const employeeArr = [];
+        const roleArr = [];
+        const whiteSpace = ' ';
+        // query to get employee names
+        db.query(`SELECT employee.first_name, employee.last_name FROM employee`, (err, result) => {
+          if (err) {
+            console.log(err)
+          }
+          employeeMap = result.map(employee => {
+            return employee.first_name.concat(whiteSpace, employee.last_name);
+          });
+          employeeMap.forEach(employee => {
+            employeeArr.push(employee);
+          });
+        });
+        // query to get roles
+        db.query(`SELECT role.title FROM role`, (err, result) => {
+          if (err) {
+            console.log(err);
+          }
+          roleMap = result.map(role => {
+            return role.title;
+          });
+          roleMap.forEach(role => {
+            roleArr.push(role);
+          });
+        });
+
+
+
+        
         break;
       case 'Finish':
         break;

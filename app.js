@@ -5,36 +5,50 @@ const cTable = require('console.table');
 const init = () => {
   inquirer.prompt([
     {
-        type: 'list',
-        name: 'initPrompt',
-        message: 'What would you like to do?',
-        choices: [
-          'View all departments',
-          'View all roles',
-          'View all employees',
-          'Add a department',
-          'Add a role',
-          'Add an employee',
-          "Update an employee's role",
-          'Finish'
-        ]
+      type: 'list',
+      name: 'initPrompt',
+      message: 'What would you like to do?',
+      choices: [
+        'View all departments',
+        'View all roles',
+        'View all employees',
+        'Add a department',
+        'Add a role',
+        'Add an employee',
+        "Update an employee's role",
+        'Finish'
+      ]
     }
   ])
     .then(answer => {
       switch (answer.initPrompt) {
       ///=========== Case: View departments ===========//
         case 'View all departments':
-          const sql = `SELECT * FROM departments`
-          db.query(sql, (err, result) => {
+          let viewDepartmentssql = `SELECT * FROM departments`
+          db.query(viewDepartmentssql, (err, result) => {
             if (err) throw err;
             console.table(result);
             init();
           });
           break;
       //================================================//
+
+      //=========== Case: view roles ===================//
         case 'View all roles':
-          console.log('case: view roles');
+
+          let viewRolessql= `SELECT role.id, role.title, role.salary, departments.name AS department
+                             FROM role
+                             JOIN departments ON role.department_id = departments.id`;
+
+          db.query(viewRolessql, (err, result) => {
+            if (err) throw err;
+            console.table(result);
+            init();
+          });
+
           break;
+      //==============================================//
+
         case 'View all employees':
           console.log('case: view employees');
           break;

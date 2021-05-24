@@ -123,15 +123,83 @@ const init = () => {
           break;
         // end case
         case 'Add an employee':
-        console.log('case: add employee');
+          const managerIdsql = `SELECT employee.id, CONCAT(employee.first_name, ' ', employee.last_name) AS name, departments.name AS department
+                                FROM employee
+                                JOIN role ON role.id = employee.role_id
+                                JOIN departments ON departments.id = role.department_id
+                                WHERE employee.manager_id IS null`
+          db.query(`SELECT role.id, role.title FROM role`, (err, result) => {
+            if (err) {
+              console.log(err)
+            }
+            console.table('\n', result);
+          })
+          db.query(managerIdsql, (err, result) => {
+            if (err) {
+              console.log(err)
+            }
+            console.table('\n', result);
+          })
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'firstNameInput',
+              message: 'What is the first name of employee?',
+              validate: firstName => {
+                if (firstName) {
+                  return true;
+                }
+                console.log('You must enter a name')
+                return false;
+              }
+            },
+            {
+              type: 'input',
+              name: 'lastNameInput',
+              message: 'What is the last name of employee?',
+              validate: lastName => {
+                if (lastName) {
+                  return true;
+                }
+                console.log('You must enter a name');
+                return false;
+              }
+            },
+            {
+              type: 'input',
+              name: 'roleIdInput',
+              message: "What is the id of employee's role? (See Role Table Above)",
+              validate: role => {
+                if (role) {
+                  return true;
+                }
+                console.log('You must enter role ID');
+                return false;
+              }
+            },
+            {
+              type: 'input',
+              name: 'managerIdInput',
+              message: "What is the ID of employee's manager? (See manager table above)",
+            }
+          ])
+            .then(answers => {
+              const params = [answers.firstNameInput, answers.lastNameInput, answers.roleIdInput, answers.managerIdInput];
+              const addEmployeesql = `INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                                      VALUES (?,?,?,?)`
+                db.query(addEmployeesql, params, (err, result) => {
+                  if (err) {
+                    console.log(err);
+                  }
+                  console.log('Employee Added');
+                  init();
+                });
+            });
         break;
+      // End Case
+      //========Case update an employee's role
       case "Update an employee's role":
-        // query to get employee names
         updateEmployeeRole();
-        
-
-
-        
         break;
       case 'Finish':
         break;

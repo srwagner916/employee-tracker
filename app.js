@@ -3,6 +3,11 @@
 const db = require('./db/connection');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+// Prompts
+const addDepartmentPrompt = require('./lib/addDepartmentPrompt');
+const addRolePrompt = require('./lib/addRolePrompt');
+const addEmployeePrompt = require('./lib/addEmployeePrompt');
+const initPrompt = require('./lib/initPrompt');
 
 /////////////////////////
 /// View Tables Functions
@@ -53,19 +58,7 @@ const viewAllEmployees = () => {
 /// Add a department
 ///=================
 const addDepartment = () => {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'departmentNameInput',
-      message: 'What is the name of the department you are adding?',
-      validate: name => {
-        if (name) {
-          return true;
-        }
-        console.log('You must enter a department name');
-      }
-    }
-  ])
+  inquirer.prompt(addDepartmentPrompt)
     .then(answer => {
       const params = answer.departmentNameInput;
 
@@ -83,48 +76,18 @@ const addDepartment = () => {
 /// Add role
 ///=========
 const addRole = () => {
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'roleTitleInput',
-      message: 'What is the title of the role you are adding?',
-      validate: roleTitle => {
-        if (roleTitle) {
-          return true;
-        }
-        console.log('You must enter a role title');
-        return false
-      }
-    },
-    {
-      type: 'input',
-      name: 'salaryInput',
-      message: 'What is the salary of this role?',
-      validate: salary => {
-        if (salary) {
-          return true;
-        }
-        console.log('You must enter a salary');
-        return false;
-      }
-    },
-    {
-      type: 'input',
-      name: 'departmentIdInput',
-      message: 'What is the id of the department this role belongs to?',
-      validate: departmentId => {
-        if (departmentId) {
-          return true;
-        }
-        console.log('You must enter a department ID');
-        return false;
-      }
-    }
-  ])
+  const addRolesql = `SELECT *
+                      FROM departments`;
+
+  db.query(addRolesql, (err, result) => {
+    if (err) throw err;
+    console.table('\n', result);
+  })
+  inquirer.prompt(addRolePrompt)
     .then(answers => {
       const params = [answers.roleTitleInput, answers.salaryInput, answers.departmentIdInput];
       const addRolesql = `INSERT INTO role (title, salary, department_id)
-                   VALUES (?, ?, ?)`;
+                          VALUES (?, ?, ?)`;
       db.query(addRolesql, params, (err, result) => {
         if (err) throw err
         console.log(`=====Role added!=====`);
@@ -155,49 +118,7 @@ const addEmployee = () => {
     console.table('\n', result);
   })
   // add employee prompts
-  inquirer.prompt([
-    {
-      type: 'input',
-      name: 'firstNameInput',
-      message: 'What is the first name of employee?',
-        validate: firstName => {
-          if (firstName) {
-            return true;
-          }
-          console.log('You must enter a name')
-            return false;
-        }
-    },
-    {
-      type: 'input',
-      name: 'lastNameInput',
-      message: 'What is the last name of employee?',
-      validate: lastName => {
-        if (lastName) {
-          return true;
-        }
-        console.log('You must enter a name');
-          return false;
-      }
-    },
-    {
-      type: 'input',
-      name: 'roleIdInput',
-      message: "What is the id of employee's role? (See Role Table Above)",
-      validate: role => {
-        if (role) {
-          return true;
-        }
-        console.log('You must enter role ID');
-        return false;
-      }
-    },
-    {
-      type: 'input',
-      name: 'managerIdInput',
-      message: "What is the ID of employee's manager? (See manager table above)",
-    }
-  ])
+  inquirer.prompt(addEmployeePrompt)
     .then(answers => {
       const params = [answers.firstNameInput, answers.lastNameInput, answers.roleIdInput, answers.managerIdInput];
       // sql statement to add new employee
@@ -278,66 +199,49 @@ const updateEmployeeRole = () => {
 ////// initial prompt
 ////=================
 const init = () => {
-  inquirer.prompt([
-    {
-      type: 'list',
-      name: 'initPrompt',
-      message: 'What would you like to do?',
-      choices: [
-        'View all departments',
-        'View all roles',
-        'View all employees',
-        'Add a department',
-        'Add a role',
-        'Add an employee',
-        "Update an employee's role",
-        'Finish'
-      ]
-    }
-  ])
+  inquirer.prompt(initPrompt)
     .then(answer => {
       switch (answer.initPrompt) {
-      ///============================== Case: View departments
+      //================================= Case: View departments
         case 'View all departments':
           viewAllDepartments();
           break;
       // end case
 
-      //=============================== Case: view roles
+      //================================= Case: view roles
         case 'View all roles':
           viewAllRoles();
           break;
       //end case
       
-      //=============================== Case: View all employees
+      //================================= Case: View all employees
         case 'View all employees':
           viewAllEmployees();
           break;
 
-        //============================= Case: Add Department
+      //================================= Case: Add Department
         case 'Add a department':
           addDepartment();
           break;
-        // end case
+      // end case
         
-        //============================== Case: Add Role
+      //================================= Case: Add Role
         case 'Add a role':
           addRole();
           break;
-        // end case
+      // end case
 
-        //============================== Case: Add Employee
+      //================================= Case: Add Employee
         case 'Add an employee':
           addEmployee();
         break;
       // End Case
 
-      //================================Case update an employee's role
+      //================================= Case update an employee's role
       case "Update an employee's role":
         updateEmployeeRole();
         break;
-      case 'Finish':
-        break;
+      // End Case
     }
   });
 }

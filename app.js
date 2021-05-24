@@ -27,8 +27,8 @@ const viewAllDepartments = () => {
 ////=============
 const viewAllRoles = () => {
   let viewRolessql= `SELECT role.id, role.title, role.salary, departments.name AS department
-  FROM role
-  JOIN departments ON role.department_id = departments.id`;
+                     FROM role
+                     JOIN departments ON role.department_id = departments.id`;
 
   db.query(viewRolessql, (err, result) => {
     if (err) throw err;
@@ -67,7 +67,7 @@ const addDepartment = () => {
 
       db.query(addDepartmentsql, params, (err, result) => {
         if (err) throw err;
-        console.log(`====Department added!====`);
+        console.log(`=====Department added!=====`);
         init();
       });
     });

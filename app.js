@@ -2,6 +2,7 @@ const db = require('./db/connection');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
 
+
 const init = () => {
   inquirer.prompt([
     {
@@ -125,34 +126,9 @@ const init = () => {
         console.log('case: add employee');
         break;
       case "Update an employee's role":
-        const employeeArr = [];
-        const roleArr = [];
-        const whiteSpace = ' ';
         // query to get employee names
-        db.query(`SELECT employee.first_name, employee.last_name FROM employee`, (err, result) => {
-          if (err) {
-            console.log(err)
-          }
-          employeeMap = result.map(employee => {
-            return employee.first_name.concat(whiteSpace, employee.last_name);
-          });
-          employeeMap.forEach(employee => {
-            employeeArr.push(employee);
-          });
-        });
-        // query to get roles
-        db.query(`SELECT role.title FROM role`, (err, result) => {
-          if (err) {
-            console.log(err);
-          }
-          roleMap = result.map(role => {
-            return role.title;
-          });
-          roleMap.forEach(role => {
-            roleArr.push(role);
-          });
-        });
-
+        updateEmployeeRole();
+        
 
 
         
@@ -162,5 +138,49 @@ const init = () => {
     }
   });
 }
+
+//==========Update Employee Role Function
+const updateEmployeeRole = () => {
+  db.promise().query(`SELECT employee.id, CONCAT(employee.first_name, ' ', employee.last_name) AS name FROM employee`)
+    .then(result => {
+      let employeeArr = [];
+      let roleArr = [];
+      result[0].map(employee => {
+        return employeeArr.push(employee.name);
+      })
+      db.promise().query(`SELECT role.title FROM role`)
+        .then(result => {
+          result[0].map(role => {
+            return roleArr.push(role.title);
+          })
+        })
+        inquirer.prompt([
+          {
+            type: 'list',
+            name: 'updateEmployeeList',
+            message: 'Which employee would you like to update?',
+            choices: employeeArr
+          },
+          {
+            type: 'list',
+            name: 'updatedRoleList',
+            message: 'What is their new role?',
+            choices: roleArr
+          }
+        ])
+          .then(answers => {
+            for (let i=0; i<roleArr.length; i++) {
+              if (answers.updatedRoleList.toString() === roleArr[i]) {
+                console.log(answers.updateEmployeeList)
+                let roleId = roleArr.indexOf(roleArr[i]) + 1;
+                const params = [roleId, answers.updateEmployeeList]
+                db.query(`UPDATE employee SET role_id = ? WHERE CONCAT(employee.first_name, ' ', employee.last_name) = ?`, params)
+              }
+            }
+            init();
+          });
+    });
+}
+
 
 init();
